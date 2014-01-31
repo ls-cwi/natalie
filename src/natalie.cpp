@@ -250,6 +250,7 @@ int main(int argc, char** argv)
                                   pParserG2,
                                   options._eValCutOff);
 
+  std::cout << "Version number: " << NATALIE_VERSION << std::endl;
   if (!natalie.init(pParserG1, pParserG2, pParserGm))
     return 1;
 
