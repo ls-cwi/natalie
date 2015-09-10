@@ -83,7 +83,7 @@ inline bool LedaParser<GR>::parse()
 
   /* we parse the first three lines, starting with the header */
   int row = 0;
-  std::string line, nodeDataType, edgeDataType;
+  std::string line, nodeDataType, edgeDataType, dir_undir_flag;
 
   // skip comments
   do {
@@ -121,6 +121,17 @@ inline bool LedaParser<GR>::parse()
 
   edgeDataType = line;
 
+  /* next is the directed/undirected flag */
+
+  // skip comments
+  do {
+    std::getline(inFile, line);
+    row++;
+  }
+  while (line.size() && line[0] == '#');
+
+  dir_undir_flag = line;
+
   /* now it's time for the nodes and finally the edges */
   bool res = parseNodes(inFile, row) && parseEdges(inFile, row);
 
@@ -141,6 +152,7 @@ inline bool LedaParser<GR>::parseNodes(std::istream& inFile, int& row)
   while (line.size() && line[0] == '#');
 
   std::stringstream lineStream(line);
+  
   lineStream >> _nNodes;
   if (!lineStream.eof())
   {
@@ -237,6 +249,7 @@ inline bool LedaParser<GR>::parseEdges(std::istream& inFile, int& row)
     if (!(res == 3 || res == 4))
     {
       std::cerr << "Error: invalid edge at line " << row << std::endl;
+      std::cerr << line << std::endl;
       return false;
     }
 
