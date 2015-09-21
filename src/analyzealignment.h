@@ -54,6 +54,7 @@ private:
   int _nComponents;
   double _EC;
   double _ICS;
+  double _S3;
   double _sigmaScore;
   double _tauScore;
   IntNodeMap _componentMap;
@@ -65,6 +66,8 @@ private:
 
   double computeScore(bool useSigma);
   double computeEC();
+  double computeICS();
+  double computeS3();
   void computeComponents();
 
 public:

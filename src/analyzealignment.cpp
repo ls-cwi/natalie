@@ -17,6 +17,7 @@
 #include "analyzealignment.h"
 #include "score/scoremodel.h"
 #include "score/scoremodelcoexpressiondiscrete.h"
+#include <lemon/concepts/graph.h>
 
 using namespace lemon;
 using namespace nina;
@@ -49,6 +50,7 @@ AnalyzeAlignment<GR, BGR>::AnalyzeAlignment(const MatchingGraphType& matchingGra
   , _mappedEdges(0)
   , _EC(0)
   , _ICS(0)
+  , _S3(0)
   , _sigmaScore(0)
   , _tauScore(0)
   , _componentMap(_g)
@@ -170,6 +172,8 @@ void AnalyzeAlignment<GR, BGR>::analyze()
 {
   computeScore(true);
   computeEC();
+  computeICS();
+  computeS3();
   computeComponents();
 
   std::cout << "Number of nodes in G_1: " << _matchingGraph.getNodeCountG1() << std::endl;
@@ -180,7 +184,9 @@ void AnalyzeAlignment<GR, BGR>::analyze()
   std::cout << "Number of mapped nodes: " << _mappedNodes << std::endl;
   std::cout << "Number of mapped edges: " << _mappedEdges << std::endl;
 
-  std::cout << "Edge correctness: " << _EC << std::endl;
+  std::cout << "Edge correctness (EC): " << _EC << std::endl;
+  std::cout << "Induced Conserved Structure (ICS): " << _ICS << std::endl;
+  std::cout << "Symmetric Substructure Score (S3): " << _S3 << std::endl;
   std::cout << "Score: " << _sigmaScore << " + " 
     << _tauScore << " = " << _sigmaScore + _tauScore << std::endl;
 
@@ -310,6 +316,72 @@ double AnalyzeAlignment<GR, BGR>::computeEC()
     std::min(_matchingGraph.getEdgeCountG1(), _matchingGraph.getEdgeCountG2());
 
   return _EC;
+}
+
+template<typename GR, typename BGR>
+double AnalyzeAlignment<GR, BGR>::computeICS()
+{
+  const Graph& g1 = _matchingGraph.getG1();
+  const Graph& g2 = _matchingGraph.getG2();
+  
+  _mappedEdges = 0;
+  BoolNodeMap v_in_g2fV1(g2, false);
+  BoolEdgeMap e_in_g2fV1(g2, true);
+
+  for (EdgeIt e(g1); e != lemon::INVALID; ++e)
+  {
+    Node u1 = g1.u(e);
+    Node v1 = g1.v(e);
+    
+    Node u2 = _alignmentG1[u1];
+    Node v2 = _alignmentG1[v1];
+
+    if (u2 != lemon::INVALID && v2 != lemon::INVALID 
+        && _matchingGraph.getEdgeG2(u2, v2) != lemon::INVALID)
+    {
+      _mappedEdges++;
+      v_in_g2fV1[u2] = v_in_g2fV1[v2] = true;
+    }
+  }
+
+  SubGraph<const Graph> g2fV1(g2, v_in_g2fV1, e_in_g2fV1);
+
+  _ICS = static_cast<double>(_mappedEdges) / countEdges(g2fV1);
+
+  return _ICS;
+}
+
+template<typename GR, typename BGR>
+double AnalyzeAlignment<GR, BGR>::computeS3()
+{
+  const Graph& g1 = _matchingGraph.getG1();
+  const Graph& g2 = _matchingGraph.getG2();
+  
+  _mappedEdges = 0;
+  BoolNodeMap v_in_g2fV1(g2, false);
+  BoolEdgeMap e_in_g2fV1(g2, true);
+
+  for (EdgeIt e(g1); e != lemon::INVALID; ++e)
+  {
+    Node u1 = g1.u(e);
+    Node v1 = g1.v(e);
+    
+    Node u2 = _alignmentG1[u1];
+    Node v2 = _alignmentG1[v1];
+
+    if (u2 != lemon::INVALID && v2 != lemon::INVALID 
+        && _matchingGraph.getEdgeG2(u2, v2) != lemon::INVALID)
+    {
+      _mappedEdges++;
+      v_in_g2fV1[u2] = v_in_g2fV1[v2] = true;
+    }
+  }
+
+  SubGraph<const Graph> g2fV1(g2, v_in_g2fV1, e_in_g2fV1);
+
+  _S3 = static_cast<double>(_mappedEdges) / (std::min(_matchingGraph.getEdgeCountG1(), _matchingGraph.getEdgeCountG2()) + countEdges(g2fV1) - _mappedEdges);
+
+  return _S3;
 }
 
 template<typename GR, typename BGR>
