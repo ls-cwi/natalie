@@ -172,7 +172,7 @@ int main(int argc, char** argv)
                      "         in the solution (default)\n"
                      "     2 - Nodes and matching edges present in the solution\n"
                      "         as well as all original edges", outputType, false)
-    .refOption("r", "Specifies which relaxation to use:\n"
+    .refOption("r", "Specifies which relaxation to use [0]:\n"
                      "     0 - Cached Lagrangian decomposition (#multipliers: O(n^4))\n"
                      "     1 - Cached subproblem isolation  (#multipliers: O(n^3))",
         options._relaxationType, false)
