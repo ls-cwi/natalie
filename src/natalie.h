@@ -243,6 +243,7 @@ public:
       , _scoreModel(static_cast<int>(AVERAGE))
       , _relaxationType(static_cast<int>(LAGRANGIAN_DECOMPOSITION_CACHED))
       , _nMaxIterations(-1)
+      //, _relaxationType(0)
       , _timeLimit(-1)
       , _solverType(static_cast<int>(COMBINED))
       , _integral(false)
