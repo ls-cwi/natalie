@@ -8,6 +8,7 @@
 #ifndef LAGRANGEGNA_H_
 #define LAGRANGEGNA_H_
 
+#include <fstream>
 #include <lemon/core.h>
 #include <lemon/bp_matching.h>
 #include <lemon/adaptors.h>
@@ -715,6 +716,15 @@ inline void LagrangeGna<GR, BGR>::evaluate(const DualVector& dual,
   // solve the global problem
   _pGlobal->scale();
   _pGlobal->solve();
+  
+  // BEGIN OF HACK
+  std::ofstream outFile("/tmp/global_profits.txt");
+  for (BpEdgeIt ik(_gm); ik != lemon::INVALID; ++ik)
+  {
+    outFile << _gm.id(ik) << "\t" << _pGlobal->getProfit(ik) << std::endl;
+  }
+  outFile.close();
+  // END OF HACK
 
   // update primal variables
   _primalValue = 0;

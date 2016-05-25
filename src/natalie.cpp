@@ -330,6 +330,23 @@ int main(int argc, char** argv)
   }
   natalie.generateOutput(static_cast<OutputType::OutputType>(outputType), outputFile);
 
+  // BEGIN OF HACK
+  std::ofstream outFile("/tmp/mapping.txt");
+  const BpGraph& Gm = natalie.getMatchingGraph()->getGm();
+  for (BpGraph::EdgeIt ik(Gm); ik != lemon::INVALID; ++ik)
+  {
+    BpGraph::Node i = Gm.redNode(ik);
+    BpGraph::Node k = Gm.blueNode(ik);
+    outFile << Gm.id(ik)
+            << "\t"
+            << natalie.getMatchingGraph()->getLabelGm(i)
+            << "\t"
+            << natalie.getMatchingGraph()->getLabelGm(k)
+            << std::endl;
+  }
+  outFile.close();
+  // END OF HACK
+  
   if (nSamples > 0)
     natalie.computePValue(nSamples);
 
